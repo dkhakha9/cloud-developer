@@ -18,12 +18,73 @@ router.get('/', async (req: Request, res: Response) => {
 
 //@TODO
 //Add an endpoint to GET a specific resource by Primary Key
+router.get('/:id', async (req: Request, res: Response) => {
+    
+    let { id } = req.params;
+
+    if ( !id ) {
+      return res.status(400)
+                .send(`id is required`);
+    }
+    
+    const item = await FeedItem.findByPk(id);
+
+    if ( !item ) {
+        return res.status(404)
+                  .send(`item id ${id} is not found`);
+    }
+    
+    if(item.url) {
+        item.url = AWS.getGetSignedUrl(item.url);
+    }
+
+    res.send(item);
+});
 
 // update a specific resource
 router.patch('/:id', 
     requireAuth, 
     async (req: Request, res: Response) => {
         //@TODO try it yourself
+        let { id } = req.params;
+
+        if ( !id ) {
+            return res.status(400)
+                        .send(`id is required`);
+        }
+
+        const caption = req.body.caption;
+        const fileName = req.body.url;
+
+        // check Caption is valid
+        if (caption && fileName) {
+            const [numberOfAffectedRows, upd_item] = await FeedItem.update(
+                {caption: caption,
+                 url: fileName},
+                {where: {id: id},
+                 returning: true}
+              );
+
+            if ( upd_item.length <= 0 ) {
+                return res.status(404)
+                          .send(`item id ${id} is not found`);
+            }
+
+            return res.status(201).send(upd_item[0]);
+        }
+        else if (caption)
+        {
+
+        }
+        else if (fileName)
+        {
+
+        }
+        // check Filename is valid
+        else {
+            return res.status(400).send({ message: 'File url or Caption is required' });
+        }
+
         res.send(500).send("not implemented")
 });
 

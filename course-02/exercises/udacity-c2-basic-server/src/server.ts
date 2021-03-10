@@ -22,7 +22,7 @@ import { Car, cars as cars_list } from './cars';
 
   // Get a greeting to a specific person 
   // to demonstrate routing parameters
-  // > try it {{host}}/persons/:the_name
+  // > try it {{host}}/persons/the_name
   app.get( "/persons/:name", 
     ( req: Request, res: Response ) => {
       let { name } = req.params;
@@ -70,13 +70,100 @@ import { Car, cars as cars_list } from './cars';
 
   // @TODO Add an endpoint to GET a list of cars
   // it should be filterable by make with a query paramater
+  app.get( "/cars/", ( req: Request, res: Response ) => {
+    let { make } = req.query;
+
+    if ( !make ) {
+      return res.status(400)
+                .send(`make is required`);
+    }
+
+    return res.status(200)
+              .send(cars.filter(function (vehicle){
+                return vehicle.make == make;
+              }));
+  } );
 
   // @TODO Add an endpoint to get a specific car
   // it should require id
   // it should fail gracefully if no matching car is found
+  // http://localhost:8082/cars/5
+  app.get( "/cars/:id", ( req: Request, res: Response ) => {
+    let { id } = req.params;
+
+    if ( !id ) {
+      return res.status(400)
+                .send(`id is required`);
+    }
+
+    let found: Car = cars.find(function (vehicle){
+      return vehicle.id == Number(id);
+    })
+
+    if ( !found ) {
+      return res.status(404)
+                .send(`car id ${id} is not found`);
+    }
+
+    return res.status(200).send(found);
+  } );
 
   /// @TODO Add an endpoint to post a new car to our list
   // it should require id, type, model, and cost
+  app.post( "/cars", 
+    async ( req: Request, res: Response ) => {
+
+      let { id } = req.body;
+
+      if ( !id ) {
+        return res.status(400)
+                  .send(`car id is required`);
+      }
+
+      const carID = Number(id);
+
+      const found: Car = cars.find(function (vehicle){
+        return vehicle.id == carID;
+      })
+  
+      if ( found ) {
+        return res.status(400)
+                  .send(`car id ${id} already exists`);
+      }
+
+      let { make } = req.body;
+
+      if ( !make ) {
+        return res.status(400)
+                  .send(`car make is required`);
+      }
+
+      let { type } = req.body;
+
+      if ( !type ) {
+        return res.status(400)
+                  .send(`car type is required`);
+      }
+
+      let { model } = req.body;
+
+      if ( !model ) {
+        return res.status(400)
+                  .send(`car model is required`);
+      }
+
+      let { cost } = req.body;
+
+      if ( !cost ) {
+        return res.status(400)
+                  .send(`car cost is required`);
+      }
+
+      const num_cars = cars_list.push({ make: make, type: type, model: model, cost: cost, id: id });
+
+      return res.status(200)
+                .send(`Car with id ${id} posted. Total cars: ${num_cars}`);
+  } );
 
   // Start the Server
   app.listen( port, () => {
