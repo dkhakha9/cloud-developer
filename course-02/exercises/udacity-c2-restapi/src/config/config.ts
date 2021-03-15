@@ -1,13 +1,13 @@
 export const config = {
   "dev": {
-    "username": "udagramxaxadev",
+    "username": process.env.AWS_RDS_U,
     "password": process.env.AWS_RDS_P,
-    "database": "udagramxaxadev",
-    "host": "udagramxaxadev.cvxrm0hmag7x.us-east-2.rds.amazonaws.com",
+    "database": process.env.AWS_RDS_NAME,
+    "host": process.env.AWS_RDS_HOST,
     "dialect": "postgres",
-    "aws_region": "us-east-2",
-    "aws_profile": "udagram-xaxa-dev",
-    "aws_media_bucket": "udagram-xaxa-dev"
+    "aws_region": process.env.AWS_REGION,
+    "aws_profile": process.env.AWS_PROFILE,
+    "aws_media_bucket": process.env.AWS_MEDIA_BUCKET
   },
   "prod": {
     "username": "",
@@ -15,5 +15,8 @@ export const config = {
     "database": "udagram_prod",
     "host": "",
     "dialect": "postgres"
+  },
+  "jwt": {
+    "secret": process.env.AWS_JWT_KEY
   }
 }
