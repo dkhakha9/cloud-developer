@@ -41,12 +41,18 @@ import fs from 'fs';
 
     console.log( `filteredpath = ${ filteredpath }` );
 
-    const stats = fs.statSync(filteredpath);
+    let stats;
 
-    if (!stats.isFile())
+    try {
+      stats = fs.statSync(filteredpath);
+    } catch (err) {
+      console.log( `unable to filter image` );
+    }
+
+    if (!stats || !stats.isFile())
     {
       return res.status(400)
-                .send(`internal server error`);
+                .send(`bad URL, try again`);
     }
 
     res.sendFile(filteredpath, (err => {
